@@ -10,6 +10,10 @@ ___
 git clone https://gitlab.com/plan_eat/plan_eat.git
 cd plan_eat
 ```
+___
+## Use
+
+Before you make any changes, do not forget to **pull** first.
 
 ___
 ## Useful links
