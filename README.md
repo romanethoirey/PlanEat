@@ -6,7 +6,7 @@ The goal is to make people's life easier with a new application which allows you
 ___
 ## Installation
 
-```bash
+```
 git clone https://gitlab.com/plan_eat/plan_eat.git
 cd plan_eat
 ```
