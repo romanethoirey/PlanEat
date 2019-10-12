@@ -15,7 +15,7 @@ cd plan_eat
 ___
 ## Useful links
 
-**Trello**: https://trello.com/b/LH6XVn6v/pa8
+**Trello**: https://trello.com/b/LH6XVn6v/pa8  
 ** Google Drive**: https://drive.google.com/drive/folders/1eyuEcNNSGxqsd4ldz9Y8L57XZERA-HJW
 
 ___
