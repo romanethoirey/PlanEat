@@ -1,5 +1,4 @@
 # Plan'Eat
-___
 
 Plan'Eat is a student project.  
 The goal is to make people's life easier with a new application which allows you to plan your weekly meals and based on the list you need, you will be able to do your shopping at the same time.
