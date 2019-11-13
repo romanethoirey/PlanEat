@@ -80,7 +80,35 @@ DROP TABLE IF EXISTS `ingredients_receipe`;
 CREATE TABLE IF NOT EXISTS `ingredients_receipe` (
   `receipe_id` int(11) NOT NULL,
   `ingredient_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
   PRIMARY KEY (`receipe_id`, `ingredient_id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `planning`
+--
+DROP TABLE IF EXISTS `planning`;
+CREATE TABLE IF NOT EXISTS `planning` (
+  `receipe_id` int(11) NOT NULL,
+  `date_receipe` date NOT NULL,
+  PRIMARY KEY (`receipe_id`, `date_receipe`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `shop_list`
+--
+DROP TABLE IF EXISTS `shop_list`;
+CREATE TABLE IF NOT EXISTS `shop_list` (
+  `shop_list_id` int(11) NOT NULL,
+  `date_shop_list` date NOT NULL,
+  `amount` int(11) DEFAULT 0,
+  `ingredient_id` int(11) NOT NULL,
+  PRIMARY KEY (`shop_list_id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
