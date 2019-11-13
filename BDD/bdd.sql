@@ -54,6 +54,9 @@ CREATE TABLE IF NOT EXISTS `receipes` (
   `receipe_id` int(11) NOT NULL AUTO_INCREMENT,
   `receipe_nom` varchar(16) DEFAULT NULL,
   `receipe_description` varchar(64) DEFAULT NULL,
+  `receipe_nb_person` int(64) DEFAULT NULL,
+  `receipe_prep_time` int(64) DEFAULT NULL,
+  `receipe_step` int(64) DEFAULT NULL,
   PRIMARY KEY (`receipe_id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -94,6 +97,7 @@ DROP TABLE IF EXISTS `planning`;
 CREATE TABLE IF NOT EXISTS `planning` (
   `receipe_id` int(11) NOT NULL,
   `date_receipe` date NOT NULL,
+  `planning_user_id` date NOT NULL,
   PRIMARY KEY (`receipe_id`, `date_receipe`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -108,7 +112,48 @@ CREATE TABLE IF NOT EXISTS `shop_list` (
   `shop_list_id` int(11) NOT NULL,
   `date_shop_list` date NOT NULL,
   `amount` int(11) DEFAULT 0,
-  `ingredient_id` int(11) NOT NULL,
+  `shop_list_user_id` date NOT NULL,
   PRIMARY KEY (`shop_list_id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `produit`
+--
+DROP TABLE IF EXISTS `produit`;
+CREATE TABLE IF NOT EXISTS `produit` (
+  `produit_id` int(11) NOT NULL,
+  `produit_nom` int(11) NOT NULL,
+  `produit_amount` int(11) DEFAULT 0,
+  `produit_shop` varchar NOT NULL,
+  `produit_quantity` int(11) NOT NULL,
+  PRIMARY KEY (`produit_id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `produit_shop_list`
+--
+DROP TABLE IF EXISTS `produit_shop_list`;
+CREATE TABLE IF NOT EXISTS `produit_shop_list` (
+  `produit_id` int(11) NOT NULL,
+  `shop_list_id` int(11) NOT NULL,
+  PRIMARY KEY (`produit_id`, `shop_list_id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `produit_ingredient`
+--
+DROP TABLE IF EXISTS `produit_shop_list`;
+CREATE TABLE IF NOT EXISTS `produit_shop_list` (
+  `produit_id` int(11) NOT NULL,
+  `ingredient_id` int(11) NOT NULL,
+  PRIMARY KEY (`produit_id`, `ingredient_id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
