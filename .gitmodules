@@ -1,0 +1,3 @@
+[submodule "PlanEatBackEnd"]
+	path = PlanEatBackEnd
+	url = https://github.com/Xrhoys/PlanEatBackEnd.git
