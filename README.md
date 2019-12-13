@@ -20,4 +20,9 @@ Before you make any changes, do not forget to **pull** first.
 **Google Drive**: https://drive.google.com/drive/folders/1eyuEcNNSGxqsd4ldz9Y8L57XZERA-HJW
 
 
+## Using backend as submodule
 
+By default the backend folder will be cloned but remain empty until you explicitely request it:
+
+> git submodule init
+> git submodule update
