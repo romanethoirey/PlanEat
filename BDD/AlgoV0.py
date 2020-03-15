@@ -1,20 +1,22 @@
 import pandas as pd
 import numpy as np
 
+## Tables des utilisateurs
 
-
-##Creation de la table
-
-#nb_users = int(input("Nombre d'utilisateurs :\n"))
-nb_users = 100
+#Utilisateurs de l'app
+nb_users = 500
 users = [i for i in range(nb_users)]
-#nb_plats = int(input("Nombre de plats :\n"))
-nb_plats = 100
+
+#Plats présents dans l'app
+nb_plats = 180
 plats = [i for i in range(nb_plats)]
-#nb_none = int(input("Nombre de plats non notés pour 5 plats notés :\n"))
-nb_none = 10
+
+#Nombre de plats notés par les utilisateurs en moyenne
+nb_note = 20
+nb_none = int((1 - nb_note/nb_plats)*100)
 notes = [None for i in range(nb_none)] + [1, 2, 3, 4, 5]
 
+#Dataframe des notes
 ratings = []
 for i in users:
     for j in plats:
@@ -24,56 +26,77 @@ table = pd.DataFrame(ratings, columns=['user','plat','note'])
 table.dropna(inplace=True)
 table.reset_index(drop=True, inplace=True)
 
+##Création des dataframe par utilisateurs
 
-
-##Création des dataframe par user
-
-#Utilisateur reference
+#Utilisateur de référence
 user = 0
 df_user_ref = table[table['user'] == user]
+
+#Liste des plats notés par l'utilisateur de référence
 liste_plats = list(df_user_ref['plat'])
 
+#Dataframe avec tout les utilisateurs autres que la référence et ayant noté des plats de la liste
 df_comparaison = table[(table['user'] != user) & table['plat'].isin(liste_plats)]
 
 #Liste des utilisateurs à comparer
 liste_df_users = []
-for i in df_comparaison['user'].unique():
+liste_users = list(df_comparaison['user'].unique())
+for i in liste_users:
     liste_df_users.append(df_comparaison[df_comparaison['user'] == i])
 
+##Comparaison de l'utilisateur de référence aux autres utilisateurs
 
-
-##Comparaison du profil de reference aux autres utilisateurs
-
-#Liste des utilisateurs similaires
-ecarts = []
+#Liste des scores de similarité
 score_similarite = []
+
+"""
+Le score de similarité est un coefficient compris entre 0 et 1 indiquant à quel point deux utilisateurs sont proches (1 étant identiques).
+Ce score dépend (de manière linéaire dans ce modèle) de l'écart absolu moyen des notes de deux utilisateurs : un écart absolu moyen très
+faible implique une similarité élevée. On prend, ainsi, le complément à 1 de l'écart absolu moyen divisé par 5 (les notes de l'application
+étant sur 5, l'écart absolu moyen est compris entre 0 et 5).
+"""
+
 for i in range(len(liste_df_users)):
-    df_test = df_user_ref[df_user_ref['plat'].isin(liste_df_users[i]['plat'])]
-    ecarts.append(np.mean(np.absolute(df_test['note'].to_numpy()-liste_df_users[i]['note'].to_numpy())))
-    score_similarite.append((5-ecarts[-1])/5)
+    score_similarite.append((5 - np.mean(np.absolute(df_user_ref[df_user_ref['plat'].isin(liste_df_users[i]['plat'])]['note'].to_numpy()-liste_df_users[i]['note'].to_numpy())))/5)
 
-#Nombre d'utilisateurs similaires gardes
-nb_comparaisons = 5
-liste_min = [6 for i in range(nb_comparaisons)]
-liste_pos = [-1 for i in range(nb_comparaisons)]
-for i in range(nb_comparaisons):
-    for j in range(len(ecarts)):
-        if ecarts[j]<liste_min[i] and j not in liste_pos:
-                liste_min[i] = ecarts[j]
-                liste_pos[i] = j
+##Recommandations pondérées par le score de similarité
 
-liste_similaires = [table[table['user']==liste_df_users[i]['user'].unique()[0]] for i in liste_pos]
+#Nombre de recommandations à envoyer
+nb_recommandations = 5
 
-
-
-##Recommandations sans tri
-
+#Liste des recommandations à analyser
 liste_recommandations = []
-seuil = 5
-for i in range(nb_comparaisons):
-    df_test = table[(table['user'] == liste_similaires[i]['user'].unique()[0])\
-                    &(~table['plat'].isin(df_user_ref['plat'].to_numpy()))\
-                    &(table['note'] >= seuil)]
-    if not df_test.empty:
-        liste_recommandations.append(df_test)
-        print(df_test)
+
+#Dataframe des plats non noté par l'utilisateur de référence mais notés par les autres utilisateurs
+for i in range(len(liste_df_users)):
+    df_temp = table[(table['user'] == liste_df_users[i]['user'].unique()[0])\
+                    &(~table['plat'].isin(df_user_ref['plat'].to_numpy()))]
+    if not df_temp.empty:
+        liste_recommandations.append(df_temp)
+
+df_recommandations = pd.concat(liste_recommandations)
+
+#Liste des notes coefficientées sous forme de couples (plat,note)
+liste_notes = []
+
+for i in range(nb_plats):
+    df_calcul = df_recommandations[df_recommandations['plat'] == i]
+    
+    if not df_calcul.empty:
+        #Somme pondérée
+        temp1 = 0
+        #Coefficients
+        temp2 = 0
+        for j in range(len(df_calcul)):
+            temp1 += df_calcul.iloc[j]['note']*score_similarite[liste_users.index(df_calcul.iloc[j]['user'])]
+            temp2 += score_similarite[liste_users.index(df_calcul.iloc[j]['user'])]
+        
+        #Moyenne pondérée
+        note = temp1/temp2
+        liste_notes.append([i,note])
+
+#On parcourt l'ensemble des plats et on en garde les meilleurs
+df_recommandations = pd.DataFrame(liste_notes, columns=['plat','note']).sort_values(by=['note'], ascending=False).head(nb_recommandations).reset_index().drop(columns=['index'])
+
+##Renvoi du résultat sous forme d'un fichier JSON
+df_recommandations.drop(columns=['note']).to_json('output.json')
