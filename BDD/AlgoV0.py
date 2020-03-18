@@ -1,14 +1,30 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# # Import des bibliothéques
+
+
 import pandas as pd
 import numpy as np
+import json
 
-## Tables des utilisateurs
+
+# # Lecture du fichier d'entrée
+
+
+with open('input.json') as f:
+    data = json.load(f)
+
+
+# # Tables des utilisateurs
+
 
 #Utilisateurs de l'app
-nb_users = 500
+nb_users = 1000
 users = [i for i in range(nb_users)]
 
 #Plats présents dans l'app
-nb_plats = 180
+nb_plats = 250
 plats = [i for i in range(nb_plats)]
 
 #Nombre de plats notés par les utilisateurs en moyenne
@@ -26,10 +42,12 @@ table = pd.DataFrame(ratings, columns=['user','plat','note'])
 table.dropna(inplace=True)
 table.reset_index(drop=True, inplace=True)
 
-##Création des dataframe par utilisateurs
+
+# # Création des dataframe par utilisateurs
+
 
 #Utilisateur de référence
-user = 0
+user = data['user']
 df_user_ref = table[table['user'] == user]
 
 #Liste des plats notés par l'utilisateur de référence
@@ -44,7 +62,9 @@ liste_users = list(df_comparaison['user'].unique())
 for i in liste_users:
     liste_df_users.append(df_comparaison[df_comparaison['user'] == i])
 
-##Comparaison de l'utilisateur de référence aux autres utilisateurs
+
+# # Comparaison de l'utilisateur de référence aux autres utilisateurs
+
 
 #Liste des scores de similarité
 score_similarite = []
@@ -59,18 +79,19 @@ faible implique une similarité élevée. On prend, ainsi, le complément à 1 d
 for i in range(len(liste_df_users)):
     score_similarite.append((5 - np.mean(np.absolute(df_user_ref[df_user_ref['plat'].isin(liste_df_users[i]['plat'])]['note'].to_numpy()-liste_df_users[i]['note'].to_numpy())))/5)
 
-##Recommandations pondérées par le score de similarité
+
+# # Recommandations pondérées par le score de similarité
+
 
 #Nombre de recommandations à envoyer
-nb_recommandations = 5
+nb_recommandations = data['nb_recommandations']
 
 #Liste des recommandations à analyser
 liste_recommandations = []
 
 #Dataframe des plats non noté par l'utilisateur de référence mais notés par les autres utilisateurs
 for i in range(len(liste_df_users)):
-    df_temp = table[(table['user'] == liste_df_users[i]['user'].unique()[0])\
-                    &(~table['plat'].isin(df_user_ref['plat'].to_numpy()))]
+    df_temp = table[(table['user'] == liste_df_users[i]['user'].unique()[0])                    &(~table['plat'].isin(df_user_ref['plat'].to_numpy()))]
     if not df_temp.empty:
         liste_recommandations.append(df_temp)
 
@@ -98,5 +119,8 @@ for i in range(nb_plats):
 #On parcourt l'ensemble des plats et on en garde les meilleurs
 df_recommandations = pd.DataFrame(liste_notes, columns=['plat','note']).sort_values(by=['note'], ascending=False).head(nb_recommandations).reset_index().drop(columns=['index'])
 
-##Renvoi du résultat sous forme d'un fichier JSON
+
+# # Renvoi du résultat sous forme d'un fichier JSON
+
+
 df_recommandations.drop(columns=['note']).to_json('output.json')
